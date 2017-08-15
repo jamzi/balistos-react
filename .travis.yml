@@ -1,9 +1,31 @@
 language: node_js
 node_js:
-  - 8
+- 8
+addons:
+  ssh_known_hosts:
+  - 146.185.164.203
+branches:
+  only:
+  - master
+env:
+  global:
+  - REMOTE_APP_DIR=/var/www/balistos/
+  - REMOTE_USER=deploy
+  - REMOTE_HOST=146.185.164.203
+  - PORT=8080
+before_install:
+- openssl aes-256-cbc -K $encrypted_b6e3733dd71e_key -iv $encrypted_b6e3733dd71e_iv
+  -in deploy.enc -out deploy -d
+- npm install -g npm@^2
+install:
+- npm install --only=dev
+before_script:
+- chmod 600 deploy && mv deploy ~/.ssh/id_rsa
 cache:
   directories:
-    - node_modules
+  - node_modules
 script:
-  - npm run build
-  - npm test
+- npm run build
+- npm test
+after_success:
+- ./scripts/deploy.sh
